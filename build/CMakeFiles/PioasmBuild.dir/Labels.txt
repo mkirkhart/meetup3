@@ -1,0 +1,13 @@
+# Target labels
+ PioasmBuild
+# Source files and their labels
+C:/~prj/Dropbox/vsarm/sdk/pico/pico-rmii-ethernet/build/CMakeFiles/PioasmBuild
+C:/~prj/Dropbox/vsarm/sdk/pico/pico-rmii-ethernet/build/CMakeFiles/PioasmBuild.rule
+C:/~prj/Dropbox/vsarm/sdk/pico/pico-rmii-ethernet/build/CMakeFiles/PioasmBuild-complete.rule
+C:/~prj/Dropbox/vsarm/sdk/pico/pico-rmii-ethernet/build/pioasm/src/PioasmBuild-stamp/PioasmBuild-build.rule
+C:/~prj/Dropbox/vsarm/sdk/pico/pico-rmii-ethernet/build/pioasm/src/PioasmBuild-stamp/PioasmBuild-configure.rule
+C:/~prj/Dropbox/vsarm/sdk/pico/pico-rmii-ethernet/build/pioasm/src/PioasmBuild-stamp/PioasmBuild-download.rule
+C:/~prj/Dropbox/vsarm/sdk/pico/pico-rmii-ethernet/build/pioasm/src/PioasmBuild-stamp/PioasmBuild-install.rule
+C:/~prj/Dropbox/vsarm/sdk/pico/pico-rmii-ethernet/build/pioasm/src/PioasmBuild-stamp/PioasmBuild-mkdir.rule
+C:/~prj/Dropbox/vsarm/sdk/pico/pico-rmii-ethernet/build/pioasm/src/PioasmBuild-stamp/PioasmBuild-patch.rule
+C:/~prj/Dropbox/vsarm/sdk/pico/pico-rmii-ethernet/build/pioasm/src/PioasmBuild-stamp/PioasmBuild-update.rule

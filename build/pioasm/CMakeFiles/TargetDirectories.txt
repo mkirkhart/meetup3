@@ -1,0 +1,3 @@
+C:/~prj/Dropbox/vsarm/sdk/pico/pico-rmii-ethernet/build/pioasm/CMakeFiles/pioasm.dir
+C:/~prj/Dropbox/vsarm/sdk/pico/pico-rmii-ethernet/build/pioasm/CMakeFiles/edit_cache.dir
+C:/~prj/Dropbox/vsarm/sdk/pico/pico-rmii-ethernet/build/pioasm/CMakeFiles/rebuild_cache.dir

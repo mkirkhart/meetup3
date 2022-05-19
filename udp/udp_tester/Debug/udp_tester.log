@@ -1,0 +1,3 @@
+﻿  udp_tester.cpp
+C:\~prj\Dropbox\vsarm\sdk\pico\pico-rmii-ethernet\udp\udp_tester\udp_tester.cpp(59,24): warning C4101: 'Sender_addr': unreferenced local variable
+  udp_tester.vcxproj -> C:\~prj\Dropbox\vsarm\sdk\pico\pico-rmii-ethernet\udp\udp_tester\Debug\udp_tester.exe
