@@ -402,11 +402,12 @@ void netif_rmii_ethernet_poll() {
             //        printf("%02X", rx_frame[i]);
             // }
              printf("\n");
-            
-            int iUDPDataLength =   (rx_frame_length - 0x2c - 4);          
+
+				const int UDPDataStart = 14 + 20 + 8;
+            int iUDPDataLength =   (rx_frame_length - UDPDataStart);
              if (iUDPDataLength > 0)
              {
-                 LEDMessageReceived(&rx_frame[0x2c],iUDPDataLength);
+                 LEDMessageReceived(&rx_frame[UDPDataStart],iUDPDataLength);
              }
 
             struct pbuf* p = pbuf_alloc(PBUF_RAW, rx_frame_length, PBUF_POOL);
