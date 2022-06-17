@@ -12,6 +12,7 @@
 
 #include "lwip/dhcp.h"
 #include "lwip/init.h"
+#include "lwip/udp.h"
 
 #include "lwip/apps/httpd.h"
 
@@ -19,11 +20,13 @@ extern "C" {
 #include "rmii_ethernet/netif.h"
 }
 
-//#include "rpPIO.h"
 #include "rpNeoPixel.h"
 
-//extern void netif_rmii_ethernet_loop();
-rpNeoPixel obLEDs;
+static const u16_t UDP_LED_payload_length = 12;
+static const u16_t UDP_LED_port = 5000;
+
+
+static rpNeoPixel obLEDs;
 
 void netif_link_callback(struct netif *netif)
 {
@@ -36,38 +39,58 @@ void netif_status_callback(struct netif *netif)
 }
 
 extern "C" {
-    void LEDMessageReceived(unsigned char * pData, int iLength)
+    void LEDMessageReceived(const u8_t * const pData, const u16_t Length)
     {
         printf("LED Data : ");
-        for (int i = 0; i < iLength; i++)
+        for (int i = 0; i < Length; i++)
         {
-
             printf("%02X", pData[i]);
         }
         printf("\n");
 
-        for (int i = 0; i < 12; i+=3)
+        for(int i = 0; i < UDP_LED_payload_length; i += 3)
         {
-
-            obLEDs.setColor(i/3,pData[i], pData[i+1], pData[i+2]);
+            obLEDs.setColor((i / 3), pData[i], pData[i + 1], pData[i + 2]);
         }
         obLEDs.process();
     }
 }
 
+
+static void udp_raw_recv_callback(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *addr, u16_t port)
+{
+	LWIP_UNUSED_ARG(arg);
+
+	if((NULL != pcb) && (NULL != p))
+	{
+		u16_t packetLength = p->len;
+
+		if(UDP_LED_payload_length == packetLength)
+		{
+			LEDMessageReceived((const u8_t *)p->payload, packetLength);
+
+		}
+
+		pbuf_free(p);
+	}
+
+}
+
+
 int main() {
     // LWIP network interface
-    struct netif netif;
+	struct netif netif;
+	struct udp_pcb *pcb = NULL; 
 
-    //
-    struct netif_rmii_ethernet_config netif_config = {
-        pio0, // PIO:            0
-        0,    // pio SM:         0 and 1
-        6,    // rx pin start:   6, 7, 8    => RX0, RX1, CRS
-        10,   // tx pin start:   10, 11, 12 => TX0, TX1, TX-EN
-        14,   // mdio pin start: 14, 15   => ?MDIO, MDC
-        NULL, // MAC address (optional - NULL generates one based on flash id)
-    };
+ //
+ struct netif_rmii_ethernet_config netif_config = {
+	  pio0, // PIO:            0
+	  0,    // pio SM:         0 and 1
+	  6,    // rx pin start:   6, 7, 8    => RX0, RX1, CRS
+	  10,   // tx pin start:   10, 11, 12 => TX0, TX1, TX-EN
+	  14,   // mdio pin start: 14, 15   => ?MDIO, MDC
+	  NULL, // MAC address (optional - NULL generates one based on flash id)
+ };
 
 #if !defined(_LED_ONLY_TEST)
     // change the system clock to use the RMII reference clock from pin 20
@@ -123,7 +146,7 @@ int main() {
 
 #endif	//(_USE_DHCP)
 
-    httpd_init();
+//    httpd_init();
 
     // setup core 1 to monitor the RMII ethernet interface
     // this let's core 0 do other things :)
@@ -132,7 +155,11 @@ int main() {
     printf("pico rmii ethernet - running\n");
 
 #if !defined(_LED_ONLY_TEST)
-    netif_rmii_ethernet_loop();
+	pcb = udp_new();
+	udp_bind(pcb, IP_ADDR_ANY, 5000);
+	udp_recv(pcb, udp_raw_recv_callback, pcb);
+
+	netif_rmii_ethernet_loop();
 #endif	//_LED_ONLY_TEST
 
     while (1) {

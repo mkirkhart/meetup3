@@ -49,8 +49,6 @@ static uint8_t tx_frame_bits[1538 * 4];
 
 static const uint32_t ethernet_polynomial_le = 0xedb88320U;
 
-extern void LEDMessageReceived(unsigned char * pData, int iLength);
-
 static uint ethernet_frame_crc(const uint8_t *data, int length)
 {
     uint crc = 0xffffffff;  /* Initial value. */
@@ -242,11 +240,11 @@ static err_t netif_rmii_ethernet_output(struct netif *netif, struct pbuf *p)
 
     uint crc = ethernet_frame_crc(tx_frame, tot_len);
 
-     printf("TX: ");
-     //for (int i = 0; i < tot_len; i++) {
-     //    printf("%02X", tx_frame[i]);
-     //}
-     printf("..\n");
+    // printf("TX: ");
+    // for (int i = 0; i < tot_len; i++) {
+    //     printf("%02X", tx_frame[i]);
+    // }
+    // printf("\n");
 
     dma_channel_wait_for_finish_blocking(tx_dma_chan);
 
@@ -396,19 +394,11 @@ void netif_rmii_ethernet_poll() {
         uint rx_frame_length = ethernet_frame_length(rx_frame, sizeof(rx_frame));
 
         if (rx_frame_length) {
-             printf("RX: ");
-             //for (int i = 0; i < rx_frame_length + 4; i++) {
-             //    if (i >= 0x2c)
-            //        printf("%02X", rx_frame[i]);
+            // printf("RX: ");
+            // for (int i = 0; i < rx_frame_length + 4; i++) {
+            //     printf("%02X", rx_frame[i]);
             // }
-             printf("\n");
-
-				const int UDPDataStart = 14 + 20 + 8;
-            int iUDPDataLength =   (rx_frame_length - UDPDataStart);
-             if (iUDPDataLength > 0)
-             {
-                 LEDMessageReceived(&rx_frame[UDPDataStart],iUDPDataLength);
-             }
+            // printf("\n");
 
             struct pbuf* p = pbuf_alloc(PBUF_RAW, rx_frame_length, PBUF_POOL);
 
