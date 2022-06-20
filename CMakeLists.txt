@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 3.12)
 # note: this must happen before project()
 include(pico_sdk_import.cmake)
 
-project(pico_rmii_ethernet)
+project(pico_rmii_ethernet_meetup3)
 
 # initialize the Pico SDK
 pico_sdk_init()
@@ -50,21 +50,12 @@ target_sources(pico_lwip INTERFACE
     
     ${LWIP_PATH}/src/netif/ethernet.c
 
-    ${LWIP_PATH}/src/apps/http/httpd.c
-    ${LWIP_PATH}/src/apps/http/fs.c
-
     ${CMAKE_CURRENT_LIST_DIR}/src/lwip/sys_arch.c
 )
 
-add_executable(pico_rmii_ethernet_httpd2
-    main.cpp
-    rpNeoPixel.cpp
-    rpPIO.cpp
-)
-
 target_include_directories(pico_lwip INTERFACE
-	${LWIP_PATH}/src/include
-	${CMAKE_CURRENT_LIST_DIR}/src/lwip
+	 ${LWIP_PATH}/src/include
+	 ${CMAKE_CURRENT_LIST_DIR}/src/lwip
 )
 
 add_library(pico_rmii_ethernet INTERFACE)
@@ -74,17 +65,25 @@ target_sources(pico_rmii_ethernet INTERFACE
 )
 
 target_include_directories(pico_rmii_ethernet INTERFACE
-	${CMAKE_CURRENT_LIST_DIR}/src/include
+	 ${CMAKE_CURRENT_LIST_DIR}/src/include
 )
 
 pico_generate_pio_header(pico_rmii_ethernet ${CMAKE_CURRENT_LIST_DIR}/src/rmii_ethernet_phy_rx.pio)
 pico_generate_pio_header(pico_rmii_ethernet ${CMAKE_CURRENT_LIST_DIR}/src/rmii_ethernet_phy_tx.pio)
 
+add_executable(pico_rmii_ethernet_meetup3
+    main.cpp
+    rpNeoPixel.cpp
+    rpPIO.cpp
+)
+
 target_link_libraries(pico_rmii_ethernet INTERFACE hardware_pio hardware_dma pico_stdlib pico_unique_id pico_lwip)
-target_link_libraries(pico_rmii_ethernet_httpd2 pico_stdlib pico_multicore pico_rmii_ethernet)
-#add_subdirectory("examples/httpd")
+target_link_libraries(pico_rmii_ethernet_meetup3 pico_stdlib pico_multicore pico_rmii_ethernet)
 
-pico_enable_stdio_usb(pico_rmii_ethernet_httpd2 1)
-pico_enable_stdio_uart(pico_rmii_ethernet_httpd2 0)
+# enable use USB CDC-ACM device as stdio
+pico_enable_stdio_usb(pico_rmii_ethernet_meetup3 1)
+# disable use of UART(0?) as stdio
+pico_enable_stdio_uart(pico_rmii_ethernet_meetup3 0)
 
-pico_add_extra_outputs(pico_rmii_ethernet_httpd2)
+# create .map, .bin, .hex, .dis, .uf2
+pico_add_extra_outputs(pico_rmii_ethernet_meetup3)
