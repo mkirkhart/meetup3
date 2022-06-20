@@ -28,32 +28,30 @@ static const u16_t UDP_LED_port = 5000;
 
 static rpNeoPixel obLEDs;
 
-void netif_link_callback(struct netif *netif)
+static void netif_link_callback(struct netif *netif)
 {
     printf("netif link status changed %s\n", netif_is_link_up(netif) ? "up" : "down");
 }
 
-void netif_status_callback(struct netif *netif)
+static void netif_status_callback(struct netif *netif)
 {
     printf("netif status changed %s\n", ip4addr_ntoa(netif_ip4_addr(netif)));
 }
 
-extern "C" {
-    void LEDMessageReceived(const u8_t * const pData, const u16_t Length)
+static void LEDMessageReceived(const u8_t * const pData, const u16_t Length)
+{
+    printf("LED Data : ");
+    for (int i = 0; i < Length; i++)
     {
-        printf("LED Data : ");
-        for (int i = 0; i < Length; i++)
-        {
-            printf("%02X", pData[i]);
-        }
-        printf("\n");
-
-        for(int i = 0; i < UDP_LED_payload_length; i += 3)
-        {
-            obLEDs.setColor((i / 3), pData[i], pData[i + 1], pData[i + 2]);
-        }
-        obLEDs.process();
+		  printf("%02X", pData[i]);
     }
+    printf("\n");
+
+    for(int i = 0; i < UDP_LED_payload_length; i += 3)
+    {
+		  obLEDs.setColor((i / 3), pData[i], pData[i + 1], pData[i + 2]);
+    }
+    obLEDs.process();
 }
 
 
@@ -68,19 +66,17 @@ static void udp_raw_recv_callback(void *arg, struct udp_pcb *pcb, struct pbuf *p
 		if(UDP_LED_payload_length == packetLength)
 		{
 			LEDMessageReceived((const u8_t *)p->payload, packetLength);
-
 		}
 
 		pbuf_free(p);
 	}
-
 }
 
 
 int main() {
     // LWIP network interface
 	struct netif netif;
-	struct udp_pcb *pcb = NULL; 
+	struct udp_pcb *pcb = NULL;
 
  //
  struct netif_rmii_ethernet_config netif_config = {
@@ -114,7 +110,7 @@ int main() {
 
     sleep_ms(5000);
 
-    printf("pico rmii ethernet - httpd\n");
+    printf("pico rmii ethernet meetup3 - initialize RMII ethernet interface\n");
 
     // initilize LWIP in NO SYS mode
     lwip_init();
@@ -131,12 +127,14 @@ int main() {
     netif_set_up(&netif);
 
 #if defined(_USE_DHCP)
-    printf("pico rmii ethernet - start dhcp\n");
+    printf("pico rmii ethernet meetup3 - start dhcp\n");
     // Start DHCP client and httpd
     dhcp_start(&netif);
 
 #else
 	ip4_addr_t ip_addr, net_submask, default_gateway;
+
+	printf("pico rmii ethernet meetup3 - setup static IP address\n");
 
 	IP4_ADDR(&ip_addr, 192, 168, 111, 100);
 	IP4_ADDR(&net_submask, 255, 255, 255, 0);
@@ -146,19 +144,18 @@ int main() {
 
 #endif	//(_USE_DHCP)
 
-//    httpd_init();
+#if defined(_LED_ONLY_TEST)
+	printf("pico rmii ethernet meetup3 - running in LED only mode");
+#else
+	printf("pico rmii ethernet meetup3 - setup UDP receive");
 
-    // setup core 1 to monitor the RMII ethernet interface
-    // this let's core 0 do other things :)
-    //multicore_launch_core1(netif_rmii_ethernet_loop);
-
-    printf("pico rmii ethernet - running\n");
-
-#if !defined(_LED_ONLY_TEST)
 	pcb = udp_new();
-	udp_bind(pcb, IP_ADDR_ANY, 5000);
+	udp_bind(pcb, IP_ADDR_ANY, UDP_LED_port);
 	udp_recv(pcb, udp_raw_recv_callback, pcb);
 
+	printf("pico rmii ethernet meetup3 - running\n");
+
+	// Note: this function call never returns - LED updates are handled via udp_raw_receive_callback()
 	netif_rmii_ethernet_loop();
 #endif	//_LED_ONLY_TEST
 
