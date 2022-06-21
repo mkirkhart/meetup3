@@ -14,7 +14,6 @@
 #include "lwip/init.h"
 #include "lwip/udp.h"
 
-#include "lwip/apps/httpd.h"
 
 extern "C" {
 #include "rmii_ethernet/netif.h"
@@ -22,7 +21,7 @@ extern "C" {
 
 #include "rpNeoPixel.h"
 
-static const u16_t UDP_LED_payload_length = 12;
+static const u16_t UDP_LED_payload_length = NUM_PIXELS * COLORS_PER_PIXEL;
 static const u16_t UDP_LED_port = 5000;
 
 
@@ -47,9 +46,9 @@ static void LEDMessageReceived(const u8_t * const pData, const u16_t Length)
     }
     printf("\n");
 
-    for(int i = 0; i < UDP_LED_payload_length; i += 3)
+    for(int i = 0; i < UDP_LED_payload_length; i += COLORS_PER_PIXEL)
     {
-		  obLEDs.setColor((i / 3), pData[i], pData[i + 1], pData[i + 2]);
+		  obLEDs.setColor((i / COLORS_PER_PIXEL), pData[i], pData[i + 1], pData[i + 2]);
     }
     obLEDs.process();
 }
@@ -133,6 +132,7 @@ int main() {
 
 #else
 	ip4_addr_t ip_addr, net_submask, default_gateway;
+	char ip_addr_string[IPADDR_STRLEN_MAX + 1];
 
 	printf("pico rmii ethernet meetup3 - setup static IP address\n");
 
@@ -140,14 +140,21 @@ int main() {
 	IP4_ADDR(&net_submask, 255, 255, 255, 0);
 	IP4_ADDR(&default_gateway, 192, 168, 111, 1);
 
+	ipaddr_ntoa_r(&ip_addr, ip_addr_string, sizeof(ip_addr_string));
+	printf("Setting IP address to %s\n", ip_addr_string);
+	ipaddr_ntoa_r(&net_submask, ip_addr_string, sizeof(ip_addr_string));
+	printf("Setting subnet mask to %s\n", ip_addr_string);
+	ipaddr_ntoa_r(&default_gateway, ip_addr_string, sizeof(ip_addr_string));
+	printf("Setting default gateway to %s\n", ip_addr_string);
+
 	netif_set_addr(&netif, &ip_addr, &net_submask, &default_gateway);
 
 #endif	//(_USE_DHCP)
 
 #if defined(_LED_ONLY_TEST)
-	printf("pico rmii ethernet meetup3 - running in LED only mode");
+	printf("pico rmii ethernet meetup3 - running in LED only mode\n");
 #else
-	printf("pico rmii ethernet meetup3 - setup UDP receive");
+	printf("pico rmii ethernet meetup3 - setup UDP receive\n");
 
 	pcb = udp_new();
 	udp_bind(pcb, IP_ADDR_ANY, UDP_LED_port);
